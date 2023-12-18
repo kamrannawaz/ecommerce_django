@@ -30,6 +30,14 @@ class ProductViewSet(ViewSet):
             serializer.save()
             return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self,request,pk=None):
+        try:
+            query = Product.objects.get(id=pk)
+            query.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except:
+                return Response({"error":"does not exist!"},status=status.HTTP_404_NOT_FOUND)
 
 class ProductsView(APIView):
     permission_classes=[IsAuthenticated]
@@ -60,6 +68,14 @@ class CategoryViewSet(ViewSet):
             serializer.save()
             return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self,request,pk=None):
+        try:
+            query = Category.objects.get(id=pk)
+            query.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except:
+            return Response({"error":"does not exist!"},status=status.HTTP_404_NOT_FOUND)
     
 class CategoriesView(APIView):
     permission_classes=[IsAuthenticated]
