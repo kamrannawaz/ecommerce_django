@@ -11,8 +11,8 @@ class User(AbstractUser):
     first_name=models.CharField(max_length=100)
     last_name=models.CharField(max_length=100)
     contact=models.CharField(max_length=11)
-    is_admin=models.BooleanField(default=False)
-    email = models.EmailField(max_length=70,blank=True,unique=True)
+    is_admin=models.BooleanField(default=False,editable=False)
+    email = models.EmailField(max_length=70,blank=False,unique=True)
 
     USERNAME_FIELD='username'
 
@@ -27,7 +27,7 @@ class Address(models.Model):
     city=models.CharField(max_length=100)
 
     def __str__(self):
-        return self.user.username
+        return f'{self.user.username}'
 
 class Cart(models.Model):
     id=models.UUIDField(primary_key=True,blank=False,default=uuid.uuid4,editable=False)
@@ -36,7 +36,7 @@ class Cart(models.Model):
     product=models.ForeignKey(Product, related_name='product_cart',on_delete=models.CASCADE,blank=False)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
     
 class WishList(models.Model):
     id=models.UUIDField(primary_key=True,blank=False,default=uuid.uuid4,editable=False)
@@ -44,7 +44,7 @@ class WishList(models.Model):
     product=models.ForeignKey(Product, related_name='product_wish_list',on_delete=models.CASCADE,blank=False)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
  
 
