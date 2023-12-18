@@ -1,11 +1,40 @@
 from rest_framework import serializers
 from .models import Cart,User
+from store.models import Product
+from store.serializers import ProductSerializer
 
 class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model=Cart
         fields="__all__"
 
+class CartItemAddRemoveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Cart
+        fields=['product','quantity','id']
+
+    def create(self,validate_data):
+        user = self.context['request'].user
+        product = Product.objects.get(id=validate_data['product'].id)
+        
+        if product.quantity < validate_data['quantity']:
+            raise serializers.ValidationError('Out of stock')
+        product.quantity -= validate_data['quantity']
+        product.save(force_update=True)
+
+        cart_item = Cart.objects.filter(user=user,product=product.id).first()
+        if cart_item:
+            cart_item.quantity += validate_data['quantity']
+            cart_item.save()
+            return cart_item
+        
+        cart = Cart.objects.create(
+            user=user,
+            product=validate_data['product'],
+            quantity=validate_data['quantity']
+        )
+        cart.save()
+        return cart
 
 
 class UserSerializer(serializers.ModelSerializer):
