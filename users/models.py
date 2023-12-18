@@ -31,9 +31,9 @@ class Address(models.Model):
 
 class Cart(models.Model):
     id=models.UUIDField(primary_key=True,blank=False,default=uuid.uuid4,editable=False)
-    user=models.ForeignKey(User,related_name='user_cart',on_delete=models.CASCADE,blank=False)
-    quantity=models.IntegerField(default=0)
-    product=models.ForeignKey(Product, related_name='product_cart',on_delete=models.CASCADE,blank=False)
+    user=models.ForeignKey(User,related_name='user_cart',on_delete=models.CASCADE,null=False)
+    quantity=models.IntegerField(default=1)
+    product=models.ForeignKey(Product, related_name='product_cart',on_delete=models.CASCADE,null=False)
 
     def __str__(self):
         return str(self.id)

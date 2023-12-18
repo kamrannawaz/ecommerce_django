@@ -2,18 +2,10 @@ from rest_framework import viewsets,views
 from rest_framework import status
 from rest_framework.response import Response
 from .models import Cart,User
+from store.models import Product
 from .serializers import CartSerializer, UserSerializer,UserSignUpSerializer
 from rest_framework.permissions import IsAuthenticated
 # Create your views here.
-
-
-class CartViewSet(viewsets.ViewSet):
-    permission_classes=[IsAuthenticated]
-
-    def list(self,request):
-        query = Cart.objects.all()
-        cart = CartSerializer(query,many=True)
-        return Response(cart.data,status=status.HTTP_200_OK)
 
 class UserView(views.APIView):
     permission_classes=[IsAuthenticated]
@@ -52,3 +44,40 @@ class UserViewSet(viewsets.ViewSet):
         query = User.objects.get(id=pk)
         users = UserSerializer(query)
         return Response(users.data,status=status.HTTP_200_OK)
+    
+class CartViewSet(viewsets.ViewSet):
+    permission_classes=[IsAuthenticated]
+
+    def list(self,request):
+        query = Cart.objects.filter(user=request.user)
+        cart = CartSerializer(query,many=True)
+        return Response(cart.data,status=status.HTTP_200_OK)
+    
+    def create(self,request):
+        serializer = CartSerializer(data=request.data)
+        if serializer.is_valid():
+            product = Product.objects.get(id=request.data['product'])
+            if not request.data.get('quantity',None):
+                request.data['quantity']=1
+            if product.quantity < request.data['quantity']:
+                return Response({'error':'not enough stock'},status=status.HTTP_400_BAD_REQUEST)
+            product.quantity -= request.data['quantity']
+            product.save()
+
+            cart = Cart.objects.filter(user=request.user,product=request.data['product'])
+            if cart:
+                cart[0].quantity += request.data['quantity']
+                cart[0].save()
+                query = Cart.objects.filter(user=request.user)
+                cart = CartSerializer(query,many=True)
+                return Response(cart.data,status=status.HTTP_201_CREATED)
+
+            serializer.save(user=request.user)
+            query = Cart.objects.filter(user=request.user)
+            cart = CartSerializer(query,many=True)
+            return Response(cart.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+
+    
+    
