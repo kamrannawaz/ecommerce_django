@@ -22,6 +22,14 @@ class ProductViewSet(ViewSet):
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def partial_update(self,request,pk=None):
+        query = Product.objects.get(id=pk)
+        serializer = ProductSerializer(query,data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class ProductsView(APIView):
     permission_classes=[IsAuthenticated]
@@ -43,6 +51,14 @@ class CategoryViewSet(ViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self,request,pk=None):
+        query = Category.objects.get(id=pk)
+        serializer = CategorySerializer(query,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 class CategoriesView(APIView):
